@@ -1,0 +1,21 @@
+{
+  "name": "mve-core",
+  "version": "1.0.1",
+  "description": "mve core for npm",
+  "main": "package.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/wy2010344/npm_mve.git"
+  },
+  "keywords": [
+    "mve",
+    "mvvm",
+    "vue",
+    "TypeScript"
+  ],
+  "author": "wy2010344",
+  "license": "MIT"
+}
