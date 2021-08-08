@@ -169,14 +169,14 @@ function superModelChildren(views, getElement, getData, model, fun) {
                 var view = views.get(index);
                 views.remove(index);
                 if (view) {
-                    //视图减少
-                    parent.remove(index);
-                    //更新计数
-                    removeUpdateIndex(views, index);
                     //销毁
                     if (life.isInit) {
                         view.destroy();
                     }
+                    //更新计数
+                    removeUpdateIndex(views, index);
+                    //视图减少
+                    parent.remove(index);
                 }
             },
             move: function (oldIndex, newIndex) {

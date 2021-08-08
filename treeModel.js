@@ -163,10 +163,10 @@ function superListModelChildren(views, model, fun) {
             remove: function (index) {
                 var view = views.get(index);
                 if (view) {
+                    view.destroy();
                     views.remove(index);
                     parent.remove(index);
                     modelChildren_1.removeUpdateIndex(views, index);
-                    view.destroy();
                 }
             },
             move: function (oldIndex, newIndex) {

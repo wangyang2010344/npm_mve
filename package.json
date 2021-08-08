@@ -1,6 +1,6 @@
 {
   "name": "mve-core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "mve core for npm",
   "main": "package.js",
   "scripts": {
