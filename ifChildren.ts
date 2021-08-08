@@ -37,15 +37,15 @@ export function ifChildren<EO>(
         return fun(currentLifeModel.me)
       },
       function(children){
-        if(virtualChild){
-          parent.remove(0)
-          virtualChild=null
-        }
         if(currentObject){
           if(life.isInit){
             orDestroy(currentObject)
           }
           currentObject=null
+        }
+        if(virtualChild){
+          parent.remove(0)
+          virtualChild=null
         }
         if(children){
           //初始化

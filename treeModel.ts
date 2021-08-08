@@ -172,10 +172,10 @@ function superListModelChildren<K,V>(
 			remove(index){
 				const view=views.get(index)
 				if(view){
+					view.destroy()
 					views.remove(index)
 					parent.remove(index)
 					removeUpdateIndex(views,index)
-					view.destroy()
 				}
 			},
 			move(oldIndex,newIndex){
