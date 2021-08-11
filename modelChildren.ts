@@ -165,14 +165,20 @@ class ViewModel<V> implements ModelWriteValue<V>{
 		orDestroy(this.result)
   }
 }
-function superModelChildren<T,V,F,EO>(
-	views:BaseArray<ViewModel<V>>,
+export type RenderModelChildren<T,F>=(
+	me:mve.LifeModel,
+	row:T,
+	index:mve.GValue<number>
+)=>F
+function buildGetView<V,F,EO>(
 	getElement:(f:F)=>EOChildren<EO>,
-	getData:(f:F)=>V,
-	model:mve.CacheArrayModel<T>,
-	fun:(me:mve.LifeModel,row:T,index:mve.GValue<number>)=>F
-):EOChildFun<EO>{	
-	function getView(index:number,row:T,parent:VirtualChild<EO>){
+	getData:(f:F)=>V
+){
+	return function<T>(
+		index:number,row:T,
+		parent:VirtualChild<EO>,
+		fun:RenderModelChildren<T,F>
+	){
 		const vindex=mve.valueOf(index)
 		const lifeModel=mve.newLifeModel()
 		const cs=fun(lifeModel.me,row,vindex)
@@ -181,6 +187,13 @@ function superModelChildren<T,V,F,EO>(
 		const vx=baseChildrenBuilder(lifeModel.me,getElement(cs),vm)
 		return new ViewModel<V>(vindex,getData(cs),lifeModel,vx)
 	}
+}
+function superModelChildren<T,V,F,EO>(
+	views:BaseArray<ViewModel<V>>,
+	model:mve.CacheArrayModel<T>,
+	fun:RenderModelChildren<T,F>,
+	getView:(index:number,row:T,parent:VirtualChild<EO>,fun:RenderModelChildren<T,F>)=>ViewModel<V>
+):EOChildFun<EO>{
 	return function(parent,me){
 		const life=onceLife({
 			init(){
@@ -195,7 +208,7 @@ function superModelChildren<T,V,F,EO>(
 		})
 		const theView:mve.ArrayModelView<T>={
 			insert(index,row){
-				const view=getView(index,row,parent)
+				const view=getView(index,row,parent,fun)
 				//模型增加
 				views.insert(index,view)
 				//更新计数
@@ -221,7 +234,7 @@ function superModelChildren<T,V,F,EO>(
 				}
 			},
 			set(index,row){
-				const view=getView(index,row,parent)
+				const view=getView(index,row,parent,fun)
 				const oldView=views.set(index,view)
 				if(life.isInit){
 					view.init()
@@ -243,8 +256,7 @@ function superModelChildren<T,V,F,EO>(
 	}
 }
 ////////////////////////////////////////////通用方式////////////////////////////////////////////////
-function emptyGet(){}
-function quoteGet<T>(v:T){return v}
+const modelChildrenGetView=buildGetView((v)=>v,()=>null);
 /**
  * 从model到视图 
  * @param model 
@@ -252,9 +264,9 @@ function quoteGet<T>(v:T){return v}
  */
 export function modelChildren<T,EO>(
   model:mve.CacheArrayModel<T>,
-	fun:(me:mve.LifeModel,row:T,index:mve.GValue<number>)=>EOChildren<EO>
+	fun:RenderModelChildren<T,EOChildren<EO>>
 ):EOChildFun<EO>{
-	return superModelChildren(new SimpleArray(),quoteGet,emptyGet,model,fun)
+	return superModelChildren(new SimpleArray(),model,fun,modelChildrenGetView)
 }
 ///////////////////////////////////////////一种方式/////////////////////////////////////////////////
 export interface ModelChildrenRenderReturn<V,EO>{
@@ -267,6 +279,7 @@ function renderGetElement<V,EO>(v:ModelChildrenRenderReturn<V,EO>){
 function renderGetData<V,EO>(v:ModelChildrenRenderReturn<V,EO>){
 	return v.data
 }
+const modelCacheChildrenGetView=buildGetView(renderGetElement,renderGetData)
 /**
  * 从model到带模型视图
  * 应该是很少用的，尽量不用
@@ -280,6 +293,6 @@ export function modelCacheChildren<T,V,EO>(
 	const views=mve.arrayModelOf<ViewModel<V>>([])
 	return {
 		views:views as ModelCacheChildren<V>,
-		children:superModelChildren(views,renderGetElement,renderGetData,model, fun)
+		children:superModelChildren(views,model,fun,modelCacheChildrenGetView)
 	}
 }

@@ -32,6 +32,7 @@ export declare function superModelList<T, V>(root: ModelItem<V>, vp: VirtualList
     model: mve.CacheArrayModel<V>;
     destroy: () => void;
 };
+export declare type RenderListModelChildren<K, V> = (row: K, index: mve.GValue<number>) => ModelItem<V>;
 /**
  * 类似于modelChildren
  * 但是如果单纯的树，叶子节点交换，并不能观察到是交换

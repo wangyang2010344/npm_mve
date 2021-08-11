@@ -142,8 +142,8 @@ var ViewModel = /** @class */ (function () {
     };
     return ViewModel;
 }());
-function superModelChildren(views, getElement, getData, model, fun) {
-    function getView(index, row, parent) {
+function buildGetView(getElement, getData) {
+    return function (index, row, parent, fun) {
         var vindex = util_1.mve.valueOf(index);
         var lifeModel = util_1.mve.newLifeModel();
         var cs = fun(lifeModel.me, row, vindex);
@@ -151,7 +151,9 @@ function superModelChildren(views, getElement, getData, model, fun) {
         var vm = parent.newChildAt(index);
         var vx = childrenBuilder_1.baseChildrenBuilder(lifeModel.me, getElement(cs), vm);
         return new ViewModel(vindex, getData(cs), lifeModel, vx);
-    }
+    };
+}
+function superModelChildren(views, model, fun, getView) {
     return function (parent, me) {
         var life = util_1.onceLife({
             init: function () {
@@ -166,7 +168,7 @@ function superModelChildren(views, getElement, getData, model, fun) {
         });
         var theView = {
             insert: function (index, row) {
-                var view = getView(index, row, parent);
+                var view = getView(index, row, parent, fun);
                 //模型增加
                 views.insert(index, view);
                 //更新计数
@@ -192,7 +194,7 @@ function superModelChildren(views, getElement, getData, model, fun) {
                 }
             },
             set: function (index, row) {
-                var view = getView(index, row, parent);
+                var view = getView(index, row, parent, fun);
                 var oldView = views.set(index, view);
                 if (life.isInit) {
                     view.init();
@@ -214,15 +216,14 @@ function superModelChildren(views, getElement, getData, model, fun) {
     };
 }
 ////////////////////////////////////////////通用方式////////////////////////////////////////////////
-function emptyGet() { }
-function quoteGet(v) { return v; }
+var modelChildrenGetView = buildGetView(function (v) { return v; }, function () { return null; });
 /**
  * 从model到视图
  * @param model
  * @param fun
  */
 function modelChildren(model, fun) {
-    return superModelChildren(new util_1.SimpleArray(), quoteGet, emptyGet, model, fun);
+    return superModelChildren(new util_1.SimpleArray(), model, fun, modelChildrenGetView);
 }
 exports.modelChildren = modelChildren;
 function renderGetElement(v) {
@@ -231,6 +232,7 @@ function renderGetElement(v) {
 function renderGetData(v) {
     return v.data;
 }
+var modelCacheChildrenGetView = buildGetView(renderGetElement, renderGetData);
 /**
  * 从model到带模型视图
  * 应该是很少用的，尽量不用
@@ -241,7 +243,7 @@ function modelCacheChildren(model, fun) {
     var views = util_1.mve.arrayModelOf([]);
     return {
         views: views,
-        children: superModelChildren(views, renderGetElement, renderGetData, model, fun)
+        children: superModelChildren(views, model, fun, modelCacheChildrenGetView)
     };
 }
 exports.modelCacheChildren = modelCacheChildren;

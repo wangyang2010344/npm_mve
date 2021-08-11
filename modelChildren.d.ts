@@ -40,12 +40,13 @@ export interface ModelCacheReturn<V> {
  * @param insert
  */
 export declare function modelCache<T, V>(model: mve.CacheArrayModel<T>, insert: (row: T, index: mve.GValue<number>) => V, destroy?: (v: V) => void): ModelCacheReturn<V>;
+export declare type RenderModelChildren<T, F> = (me: mve.LifeModel, row: T, index: mve.GValue<number>) => F;
 /**
  * 从model到视图
  * @param model
  * @param fun
  */
-export declare function modelChildren<T, EO>(model: mve.CacheArrayModel<T>, fun: (me: mve.LifeModel, row: T, index: mve.GValue<number>) => EOChildren<EO>): EOChildFun<EO>;
+export declare function modelChildren<T, EO>(model: mve.CacheArrayModel<T>, fun: RenderModelChildren<T, EOChildren<EO>>): EOChildFun<EO>;
 export interface ModelChildrenRenderReturn<V, EO> {
     data: V;
     element: EOChildren<EO>;
@@ -58,5 +59,5 @@ export interface ModelChildrenRenderReturn<V, EO> {
  */
 export declare function modelCacheChildren<T, V, EO>(model: mve.CacheArrayModel<T>, fun: (me: mve.LifeModel, row: T, index: mve.GValue<number>) => ModelChildrenRenderReturn<V, EO>): {
     views: ModelCacheChildren<V>;
-    children: EOChildFun<EO>;
+    children: EOChildFun<unknown>;
 };
