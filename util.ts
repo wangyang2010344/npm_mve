@@ -26,6 +26,7 @@ export interface BaseReadArray<T>{
 export interface BaseArray<T> extends BaseReadArray<T>{
 	insert(i:number,v:T):void
 	remove(i:number):T
+	set(i:number,v:T):T
 	move(oldI:number,newI:number):void
 	clear():void
 }
@@ -34,11 +35,19 @@ export class SimpleArray<T> extends Array<T> implements BaseArray<T>{
 		super()
 		Object["setPrototypeOf"](this, SimpleArray.prototype);
 	}
+	get(i: number): T {
+		return this[i]
+	}
 	insert(i: number, v: T): void {
 		this.splice(i,0,v)
 	}
 	remove(i: number): T {
 		return this.splice(i,1)[0]
+	}
+	set(i: number, v: T): T {
+		const oldV=this[i]
+		this[i]=v
+		return oldV
 	}
 	move(oldI: number, newI: number): void {
 		arrayMove(this,oldI,newI)
@@ -48,9 +57,6 @@ export class SimpleArray<T> extends Array<T> implements BaseArray<T>{
 	}
 	size(): number {
 		return this.length
-	}
-	get(i: number): T {
-		return this[i]
 	}
 }
 export namespace mve{
@@ -117,6 +123,7 @@ export namespace mve{
   export interface ArrayModelView<T>{
     insert(index:number,row:T):void
     remove(index:number):void
+		set(index:number,row:T):void
     move(oldIndex:number,newIndex:number):void
 	}
 	/**构造只读的模型*/
@@ -206,13 +213,21 @@ export namespace mve{
     }
     remove(index:number){
       /*更常识的使用方法*/
-      var row=this.get(index);
+      const row=this.get(index);
       this.array_value.remove(index);
 			this.views_value.forEach(function(view){
         view.remove(index);
 			})
       this.reload_size();
       return row;
+		}
+		set(index:number,row:T){
+			const oldRow=this.array_value.splice(index,1,row)[0]
+			this.views_value.forEach(function(view){
+				view.set(index,row)
+			})
+			this.reload_size()
+			return oldRow
 		}
 		/**清理匹配项 */
 		removeWhere(fun:(row:T,i:number)=>boolean){

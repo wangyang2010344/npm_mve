@@ -158,14 +158,17 @@ function superListModelChildren<K,V>(
 	model:mve.CacheArrayModel<K>,
 	fun:(row:K,index:mve.GValue<number>)=>ModelItem<V>
 ):ModelItemFun<V>{
+	function getView(index:number,row:K,parent:VirtualChild<V>){
+		const vindex=mve.valueOf(index)
+		const value=fun(row,vindex)
+		const vm=parent.newChildAt(index)
+		const vx=baseChildrenBuilder(value,vm)
+		return new ModelChildView(value,vindex,vx)
+	}
 	return function(parent){
 		const theView:mve.ArrayModelView<K>={
 			insert(index,row){
-				const vindex=mve.valueOf(index)
-				const value=fun(row,vindex)
-				const vm=parent.newChildAt(index)
-				const vx=baseChildrenBuilder(value,vm)
-				const view=new ModelChildView(value,vindex,vx)
+				const view=getView(index,row,parent)
 				views.insert(index,view)
 				initUpdateIndex(views,index)
 			},
@@ -177,6 +180,12 @@ function superListModelChildren<K,V>(
 					parent.remove(index)
 					removeUpdateIndex(views,index)
 				}
+			},
+			set(index,row){
+				const view=getView(index,row,parent)
+				const oldView=views.set(index,view)
+				oldView.destroy()
+				parent.remove(index+1)
 			},
 			move(oldIndex,newIndex){
 				views.move(oldIndex,newIndex)

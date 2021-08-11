@@ -72,11 +72,15 @@ function getCacheModel(pDestroy) {
 }
 function superModelCache(views, model, insert, destroy) {
     var cacheModel = getCacheModel(destroy);
+    function getView(index, row) {
+        var vindex = util_1.mve.valueOf(index);
+        var vrow = insert(row, vindex);
+        return cacheModel(vindex, vrow);
+    }
     var theView = {
         insert: function (index, row) {
-            var vindex = util_1.mve.valueOf(index);
-            var vrow = insert(row, vindex);
-            views.insert(index, cacheModel(vindex, vrow));
+            var view = getView(index, row);
+            views.insert(index, view);
             //更新计数
             initUpdateIndex(views, index);
         },
@@ -89,6 +93,11 @@ function superModelCache(views, model, insert, destroy) {
                 removeUpdateIndex(views, index);
                 view.destroy();
             }
+        },
+        set: function (index, row) {
+            var view = getView(index, row);
+            var oldView = views.set(index, view);
+            oldView.destroy();
         },
         move: function (oldIndex, newIndex) {
             //模型变更
@@ -134,6 +143,15 @@ var ViewModel = /** @class */ (function () {
     return ViewModel;
 }());
 function superModelChildren(views, getElement, getData, model, fun) {
+    function getView(index, row, parent) {
+        var vindex = util_1.mve.valueOf(index);
+        var lifeModel = util_1.mve.newLifeModel();
+        var cs = fun(lifeModel.me, row, vindex);
+        //创建视图
+        var vm = parent.newChildAt(index);
+        var vx = childrenBuilder_1.baseChildrenBuilder(lifeModel.me, getElement(cs), vm);
+        return new ViewModel(vindex, getData(cs), lifeModel, vx);
+    }
     return function (parent, me) {
         var life = util_1.onceLife({
             init: function () {
@@ -148,13 +166,7 @@ function superModelChildren(views, getElement, getData, model, fun) {
         });
         var theView = {
             insert: function (index, row) {
-                var vindex = util_1.mve.valueOf(index);
-                var lifeModel = util_1.mve.newLifeModel();
-                var cs = fun(lifeModel.me, row, vindex);
-                //创建视图
-                var vm = parent.newChildAt(index);
-                var vx = childrenBuilder_1.baseChildrenBuilder(lifeModel.me, getElement(cs), vm);
-                var view = new ViewModel(vindex, getData(cs), lifeModel, vx);
+                var view = getView(index, row, parent);
                 //模型增加
                 views.insert(index, view);
                 //更新计数
@@ -178,6 +190,15 @@ function superModelChildren(views, getElement, getData, model, fun) {
                     //视图减少
                     parent.remove(index);
                 }
+            },
+            set: function (index, row) {
+                var view = getView(index, row, parent);
+                var oldView = views.set(index, view);
+                if (life.isInit) {
+                    view.init();
+                    oldView.destroy();
+                }
+                parent.remove(index + 1);
             },
             move: function (oldIndex, newIndex) {
                 //模型变更

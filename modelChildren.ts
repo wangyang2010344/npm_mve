@@ -1,5 +1,6 @@
 import { baseChildrenBuilder, EOChildFun, EOChildren } from "./childrenBuilder";
 import { BuildResult, mve, onceLife, orRun, orInit, orDestroy, BaseReadArray, BaseArray, SimpleArray } from "./util";
+import { VirtualChild } from "./virtualTreeChildren";
 
 export interface ModelCacheValue<V>{
 	readonly index:mve.GValue<number>
@@ -85,11 +86,15 @@ function superModelCache<T,V>(
 	destroy?:(v:V)=>void
 ){
 	const cacheModel=getCacheModel(destroy)
+	function getView(index:number,row:T){
+		const vindex=mve.valueOf(index)
+		const vrow=insert(row,vindex)
+		return cacheModel(vindex,vrow)
+	}
 	const theView:mve.ArrayModelView<T>={
 		insert(index,row){
-			const vindex=mve.valueOf(index)
-			const vrow=insert(row,vindex)
-			views.insert(index,cacheModel(vindex,vrow))
+			const view=getView(index,row)
+			views.insert(index,view)
 			//更新计数
 			initUpdateIndex(views,index)
 		},
@@ -102,6 +107,11 @@ function superModelCache<T,V>(
 				removeUpdateIndex(views,index)
 				view.destroy()
 			}
+		},
+		set(index,row){
+			const view=getView(index,row)
+			const oldView=views.set(index,view)
+			oldView.destroy()
 		},
 		move(oldIndex,newIndex){
 			//模型变更
@@ -161,7 +171,16 @@ function superModelChildren<T,V,F,EO>(
 	getData:(f:F)=>V,
 	model:mve.CacheArrayModel<T>,
 	fun:(me:mve.LifeModel,row:T,index:mve.GValue<number>)=>F
-):EOChildFun<EO>{
+):EOChildFun<EO>{	
+	function getView(index:number,row:T,parent:VirtualChild<EO>){
+		const vindex=mve.valueOf(index)
+		const lifeModel=mve.newLifeModel()
+		const cs=fun(lifeModel.me,row,vindex)
+		//创建视图
+		const vm=parent.newChildAt(index)
+		const vx=baseChildrenBuilder(lifeModel.me,getElement(cs),vm)
+		return new ViewModel<V>(vindex,getData(cs),lifeModel,vx)
+	}
 	return function(parent,me){
 		const life=onceLife({
 			init(){
@@ -176,13 +195,7 @@ function superModelChildren<T,V,F,EO>(
 		})
 		const theView:mve.ArrayModelView<T>={
 			insert(index,row){
-				const vindex=mve.valueOf(index)
-				const lifeModel=mve.newLifeModel()
-				const cs=fun(lifeModel.me,row,vindex)
-				//创建视图
-				const vm=parent.newChildAt(index)
-				const vx=baseChildrenBuilder(lifeModel.me,getElement(cs),vm)
-				const view=new ViewModel<V>(vindex,getData(cs),lifeModel,vx)
+				const view=getView(index,row,parent)
 				//模型增加
 				views.insert(index,view)
 				//更新计数
@@ -206,6 +219,15 @@ function superModelChildren<T,V,F,EO>(
 					//视图减少
 					parent.remove(index)
 				}
+			},
+			set(index,row){
+				const view=getView(index,row,parent)
+				const oldView=views.set(index,view)
+				if(life.isInit){
+					view.init()
+					oldView.destroy()
+				}
+				parent.remove(index+1)
 			},
 			move(oldIndex,newIndex){
 				//模型变更

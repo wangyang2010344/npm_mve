@@ -149,14 +149,17 @@ var ModelChildView = /** @class */ (function () {
     return ModelChildView;
 }());
 function superListModelChildren(views, model, fun) {
+    function getView(index, row, parent) {
+        var vindex = util_1.mve.valueOf(index);
+        var value = fun(row, vindex);
+        var vm = parent.newChildAt(index);
+        var vx = baseChildrenBuilder(value, vm);
+        return new ModelChildView(value, vindex, vx);
+    }
     return function (parent) {
         var theView = {
             insert: function (index, row) {
-                var vindex = util_1.mve.valueOf(index);
-                var value = fun(row, vindex);
-                var vm = parent.newChildAt(index);
-                var vx = baseChildrenBuilder(value, vm);
-                var view = new ModelChildView(value, vindex, vx);
+                var view = getView(index, row, parent);
                 views.insert(index, view);
                 modelChildren_1.initUpdateIndex(views, index);
             },
@@ -168,6 +171,12 @@ function superListModelChildren(views, model, fun) {
                     parent.remove(index);
                     modelChildren_1.removeUpdateIndex(views, index);
                 }
+            },
+            set: function (index, row) {
+                var view = getView(index, row, parent);
+                var oldView = views.set(index, view);
+                oldView.destroy();
+                parent.remove(index + 1);
             },
             move: function (oldIndex, newIndex) {
                 views.move(oldIndex, newIndex);

@@ -44,11 +44,19 @@ var SimpleArray = /** @class */ (function (_super) {
         Object["setPrototypeOf"](_this, SimpleArray.prototype);
         return _this;
     }
+    SimpleArray.prototype.get = function (i) {
+        return this[i];
+    };
     SimpleArray.prototype.insert = function (i, v) {
         this.splice(i, 0, v);
     };
     SimpleArray.prototype.remove = function (i) {
         return this.splice(i, 1)[0];
+    };
+    SimpleArray.prototype.set = function (i, v) {
+        var oldV = this[i];
+        this[i] = v;
+        return oldV;
     };
     SimpleArray.prototype.move = function (oldI, newI) {
         arrayMove(this, oldI, newI);
@@ -58,9 +66,6 @@ var SimpleArray = /** @class */ (function (_super) {
     };
     SimpleArray.prototype.size = function () {
         return this.length;
-    };
-    SimpleArray.prototype.get = function (i) {
-        return this[i];
     };
     return SimpleArray;
 }(Array));
@@ -216,6 +221,14 @@ var mve;
             });
             this.reload_size();
             return row;
+        };
+        ArrayModel.prototype.set = function (index, row) {
+            var oldRow = this.array_value.splice(index, 1, row)[0];
+            this.views_value.forEach(function (view) {
+                view.set(index, row);
+            });
+            this.reload_size();
+            return oldRow;
         };
         /**清理匹配项 */
         ArrayModel.prototype.removeWhere = function (fun) {

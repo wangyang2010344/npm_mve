@@ -7,17 +7,19 @@ export interface BaseReadArray<T> {
 export interface BaseArray<T> extends BaseReadArray<T> {
     insert(i: number, v: T): void;
     remove(i: number): T;
+    set(i: number, v: T): T;
     move(oldI: number, newI: number): void;
     clear(): void;
 }
 export declare class SimpleArray<T> extends Array<T> implements BaseArray<T> {
     constructor();
+    get(i: number): T;
     insert(i: number, v: T): void;
     remove(i: number): T;
+    set(i: number, v: T): T;
     move(oldI: number, newI: number): void;
     clear(): void;
     size(): number;
-    get(i: number): T;
 }
 export declare namespace mve {
     /**只读形式*/
@@ -56,6 +58,7 @@ export declare namespace mve {
     interface ArrayModelView<T> {
         insert(index: number, row: T): void;
         remove(index: number): void;
+        set(index: number, row: T): void;
         move(oldIndex: number, newIndex: number): void;
     }
     /**构造只读的模型*/
@@ -81,6 +84,7 @@ export declare namespace mve {
         private reload_size;
         insert(index: number, row: T): void;
         remove(index: number): T;
+        set(index: number, row: T): T;
         /**清理匹配项 */
         removeWhere(fun: (row: T, i: number) => boolean): void;
         /**清理单纯相等的项 */
