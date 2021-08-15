@@ -70,13 +70,15 @@ function getCacheModel(pDestroy) {
         return new CacheModel(index, value);
     };
 }
-function superModelCache(views, model, insert, destroy) {
+function buildModelCacheView(insert, destroy) {
     var cacheModel = getCacheModel(destroy);
-    function getView(index, row) {
+    return function (index, row) {
         var vindex = util_1.mve.valueOf(index);
         var vrow = insert(row, vindex);
         return cacheModel(vindex, vrow);
-    }
+    };
+}
+function superModelCache(views, model, getView) {
     var theView = {
         insert: function (index, row) {
             var view = getView(index, row);
@@ -120,9 +122,10 @@ function superModelCache(views, model, insert, destroy) {
  */
 function modelCache(model, insert, destroy) {
     var views = util_1.mve.arrayModelOf([]);
+    var getView = buildModelCacheView(insert, destroy);
     return {
         views: views,
-        destroy: superModelCache(views, model, insert, destroy)
+        destroy: superModelCache(views, model, getView)
     };
 }
 exports.modelCache = modelCache;

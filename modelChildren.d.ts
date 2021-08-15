@@ -57,7 +57,7 @@ export interface ModelChildrenRenderReturn<V, EO> {
  * @param model
  * @param fun
  */
-export declare function modelCacheChildren<T, V, EO>(model: mve.CacheArrayModel<T>, fun: (me: mve.LifeModel, row: T, index: mve.GValue<number>) => ModelChildrenRenderReturn<V, EO>): {
+export declare function modelCacheChildren<T, V, EO>(model: mve.CacheArrayModel<T>, fun: RenderModelChildren<T, ModelChildrenRenderReturn<V, EO>>): {
     views: ModelCacheChildren<V>;
     children: EOChildFun<unknown>;
 };

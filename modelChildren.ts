@@ -79,18 +79,22 @@ function getCacheModel<V>(pDestroy?:(v:V)=>void){
 		return new CacheModel(index,value)
 	}
 }
-function superModelCache<T,V>(
-	views:BaseArray<ModelWriteValue<V>>,
-	model:mve.CacheArrayModel<T>,
+function buildModelCacheView<T,V>(
 	insert:(row:T,index:mve.GValue<number>)=>V,
 	destroy?:(v:V)=>void
 ){
 	const cacheModel=getCacheModel(destroy)
-	function getView(index:number,row:T){
+	return function(index:number,row:T){
 		const vindex=mve.valueOf(index)
 		const vrow=insert(row,vindex)
 		return cacheModel(vindex,vrow)
 	}
+}
+function superModelCache<T,V>(
+	views:BaseArray<ModelWriteValue<V>>,
+	model:mve.CacheArrayModel<T>,
+	getView:(index:number,row:T)=>ModelWriteValue<V>
+){
 	const theView:mve.ArrayModelView<T>={
 		insert(index,row){
 			const view=getView(index,row)
@@ -145,9 +149,10 @@ export function modelCache<T,V>(
 	destroy?:(v:V)=>void
 ):ModelCacheReturn<V>{
 	const views=mve.arrayModelOf<ModelWriteValue<V>>([])
+	const getView=buildModelCacheView(insert,destroy)
 	return {
 		views:views as ModelCacheChildren<V>,
-		destroy:superModelCache<T,V>(views,model,insert,destroy)
+		destroy:superModelCache<T,V>(views,model,getView)
 	}
 }
 class ViewModel<V> implements ModelWriteValue<V>{
@@ -288,7 +293,7 @@ const modelCacheChildrenGetView=buildGetView(renderGetElement,renderGetData)
  */
 export function modelCacheChildren<T,V,EO>(
   model:mve.CacheArrayModel<T>,
-	fun:(me:mve.LifeModel,row:T,index:mve.GValue<number>)=>ModelChildrenRenderReturn<V,EO>
+	fun:RenderModelChildren<T,ModelChildrenRenderReturn<V,EO>>
 ){
 	const views=mve.arrayModelOf<ViewModel<V>>([])
 	return {
