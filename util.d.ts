@@ -11,10 +11,14 @@ export interface BaseArray<T> extends BaseReadArray<T> {
     move(oldI: number, newI: number): void;
     clear(): void;
 }
-export declare class SimpleArray<T> extends Array<T> implements BaseArray<T> {
-    constructor();
+export declare class SimpleArray<T> implements BaseArray<T> {
+    private array;
     get(i: number): T;
     insert(i: number, v: T): void;
+    push(v: T): void;
+    forEach(fun: (v: T, i: number) => void): void;
+    indexOf(v: T): number;
+    splice(i: number, d: number, ...vs: T[]): T[];
     remove(i: number): T;
     set(i: number, v: T): T;
     move(oldI: number, newI: number): void;
@@ -73,6 +77,8 @@ export declare namespace mve {
         getLast(): T;
         findIndex(fun: (v: T, i: number) => boolean): number;
         forEach(fun: (row: T, i: number) => void): void;
+        map<V>(fun: (row: T, i: number) => V): V[];
+        filter(fun: (row: T, i: number) => boolean): T[];
         findRow(fun: (row: T, i: number) => boolean): T;
         indexOf(row: T): number;
     }

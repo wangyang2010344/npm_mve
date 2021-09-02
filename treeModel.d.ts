@@ -39,7 +39,14 @@ export declare type RenderListModelChildren<K, V> = (row: K, index: mve.GValue<n
  * @param model
  * @param fun
  */
-export declare function listModelChilren<K, V>(model: mve.CacheArrayModel<K>, fun: (row: K, index: mve.GValue<number>) => ModelItem<V>): ModelItemFun<V>;
+export declare function listModelChilren<K, V>(model: mve.CacheArrayModel<K>, fun: RenderListModelChildren<K, V>): ModelItemFun<V>;
+/**
+ * 类似于modelChildren
+ * 但是如果单纯的树，叶子节点交换，并不能观察到是交换
+ * @param model
+ * @param fun
+ */
+export declare function listModelChilrenReverse<K, V>(model: mve.CacheArrayModel<K>, fun: RenderListModelChildren<K, V>): ModelItemFun<V>;
 /**
  * 模仿DOM节点，有前后，和绝对位置
  */

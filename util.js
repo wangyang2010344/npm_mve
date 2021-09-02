@@ -14,6 +14,11 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
 exports.__esModule = true;
 exports.onceLife = exports.BuildResultList = exports.arrayMove = exports.arrayForEach = exports.isArray = exports.orDestroy = exports.orInit = exports.orRun = exports.mve = exports.SimpleArray = void 0;
 var Dep = /** @class */ (function () {
@@ -37,38 +42,52 @@ var Dep = /** @class */ (function () {
     Dep.uid = 0;
     return Dep;
 }());
-var SimpleArray = /** @class */ (function (_super) {
-    __extends(SimpleArray, _super);
+var SimpleArray = /** @class */ (function () {
     function SimpleArray() {
-        var _this = _super.call(this) || this;
-        Object["setPrototypeOf"](_this, SimpleArray.prototype);
-        return _this;
+        this.array = [];
     }
     SimpleArray.prototype.get = function (i) {
-        return this[i];
+        return this.array[i];
     };
     SimpleArray.prototype.insert = function (i, v) {
-        this.splice(i, 0, v);
+        this.array.splice(i, 0, v);
+    };
+    SimpleArray.prototype.push = function (v) {
+        this.array.push(v);
+    };
+    SimpleArray.prototype.forEach = function (fun) {
+        this.array.forEach(fun);
+    };
+    SimpleArray.prototype.indexOf = function (v) {
+        return this.array.indexOf(v);
+    };
+    SimpleArray.prototype.splice = function (i, d) {
+        var _a;
+        var vs = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            vs[_i - 2] = arguments[_i];
+        }
+        return (_a = this.array).splice.apply(_a, __spreadArray([i, d], vs));
     };
     SimpleArray.prototype.remove = function (i) {
-        return this.splice(i, 1)[0];
+        return this.array.splice(i, 1)[0];
     };
     SimpleArray.prototype.set = function (i, v) {
-        var oldV = this[i];
-        this[i] = v;
+        var oldV = this.array[i];
+        this.array[i] = v;
         return oldV;
     };
     SimpleArray.prototype.move = function (oldI, newI) {
         arrayMove(this, oldI, newI);
     };
     SimpleArray.prototype.clear = function () {
-        this.length = 0;
+        this.array.length = 0;
     };
     SimpleArray.prototype.size = function () {
-        return this.length;
+        return this.array.length;
     };
     return SimpleArray;
-}(Array));
+}());
 exports.SimpleArray = SimpleArray;
 var mve;
 (function (mve) {
@@ -166,6 +185,25 @@ var mve;
             for (var i = 0; i < size; i++) {
                 fun(this.get(i), i);
             }
+        };
+        CacheArrayModel.prototype.map = function (fun) {
+            var vs = [];
+            var size = this.size();
+            for (var i = 0; i < size; i++) {
+                vs.push(fun(this.get(i), i));
+            }
+            return vs;
+        };
+        CacheArrayModel.prototype.filter = function (fun) {
+            var vs = [];
+            var size = this.size();
+            for (var i = 0; i < size; i++) {
+                var row = this.get(i);
+                if (fun(row, i)) {
+                    vs.push(row);
+                }
+            }
+            return vs;
         };
         CacheArrayModel.prototype.findRow = function (fun) {
             var size = this.size();

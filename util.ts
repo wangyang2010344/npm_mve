@@ -30,33 +30,42 @@ export interface BaseArray<T> extends BaseReadArray<T>{
 	move(oldI:number,newI:number):void
 	clear():void
 }
-export class SimpleArray<T> extends Array<T> implements BaseArray<T>{
-	constructor(){
-		super()
-		Object["setPrototypeOf"](this, SimpleArray.prototype);
-	}
+export class SimpleArray<T> implements BaseArray<T>{
+	private array:T[]=[]
 	get(i: number): T {
-		return this[i]
+		return this.array[i]
 	}
 	insert(i: number, v: T): void {
-		this.splice(i,0,v)
+		this.array.splice(i,0,v)
+	}
+	push(v:T){
+		this.array.push(v)
+	}
+	forEach(fun:(v:T,i:number)=>void){
+		this.array.forEach(fun)
+	}
+	indexOf(v:T){
+		return this.array.indexOf(v)
+	}
+	splice(i:number,d:number,...vs:T[]){
+		return this.array.splice(i,d,...vs)
 	}
 	remove(i: number): T {
-		return this.splice(i,1)[0]
+		return this.array.splice(i,1)[0]
 	}
 	set(i: number, v: T): T {
-		const oldV=this[i]
-		this[i]=v
+		const oldV=this.array[i]
+		this.array[i]=v
 		return oldV
 	}
 	move(oldI: number, newI: number): void {
 		arrayMove(this,oldI,newI)
 	}
 	clear(): void {
-		this.length=0
+		this.array.length=0
 	}
 	size(): number {
-		return this.length
+		return this.array.length
 	}
 }
 export namespace mve{
@@ -170,6 +179,25 @@ export namespace mve{
 				fun(this.get(i),i)
 			}
     }
+		map<V>(fun:(row:T,i:number)=>V){
+			const vs:V[]=[]
+			const size=this.size()
+			for(let i=0;i<size;i++){
+				vs.push(fun(this.get(i),i))
+			}
+			return vs
+		}
+		filter(fun:(row:T,i:number)=>boolean){
+			const vs:T[]=[]
+			const size=this.size()
+			for(let i=0;i<size;i++){
+				const row=this.get(i)
+				if(fun(row,i)){
+					vs.push(row)
+				}
+			}
+			return vs
+		}
 		findRow(fun:(row:T,i:number)=>boolean){
 			const size=this.size()
 			for(let i=0;i<size;i++){
