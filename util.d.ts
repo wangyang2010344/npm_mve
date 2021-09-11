@@ -12,7 +12,8 @@ export interface BaseArray<T> extends BaseReadArray<T> {
     clear(): void;
 }
 export declare class SimpleArray<T> implements BaseArray<T> {
-    private array;
+    constructor(...ts: T[]);
+    private readonly array;
     get(i: number): T;
     insert(i: number, v: T): void;
     push(v: T): void;
