@@ -6,11 +6,23 @@ mve核心库，可与dom无关
 ## 软件架构
 使用纯typescript
 
+
+## 特点
+
+* 过程式（函数式）基因，比react更早。作者避免在ts/js中使用class/this等概念。
+* 无组件概念，完全使用编程语言本身的模块(函数)复用。
+* 基础模型只有mve.Value\<T\>和mve.ArrayModel\<T\>，构建出庞大的页面逻辑。
+* 界面布局使用纯ts/js，不引入复杂的xml，更高效地复用。
+* mvvm对属性节点针对性更新(受vue启发)，性能高。并创新地发现使用mve.ArrayModel\<T\>与界面片段一一对应(支持同级嵌套)，不使用虚拟DOM与任何形式的享元复用，和异步更新。
+* 区分与DOM引擎无关的核心模块，可用于其它自定义引擎。并提供简单的dom桥接模块。
+* 开放可定制自己的mve使用方式。
+* DEMO示例地址: https://wy2010344.gitee.io/mve-vite-demo/
+
 ## 仓库位置
 
 gitee : https://gitee.com/wy2010344/npm_mve.git
 
-github : https://github.com/wangyang2010344/npm_mve.git
+github : https://github.com/wy2010344/npm_mve.git
 
 ## 其它 
 
