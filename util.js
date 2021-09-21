@@ -217,6 +217,40 @@ var mve;
         CacheArrayModel.prototype.indexOf = function (row) {
             return this.findIndex(function (theRow) { return theRow == row; });
         };
+        CacheArrayModel.prototype.count = function (fun) {
+            var size = this.size();
+            var count = 0;
+            for (var i = 0; i < size; i++) {
+                var row = this.get(i);
+                if (fun(row, i)) {
+                    count++;
+                }
+            }
+            return count;
+        };
+        CacheArrayModel.prototype.exist = function (fun) {
+            var size = this.size();
+            for (var i = 0; i < size; i++) {
+                var row = this.get(i);
+                if (fun(row, i)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        CacheArrayModel.prototype.all = function (fun) {
+            var size = this.size();
+            for (var i = 0; i < size; i++) {
+                var row = this.get(i);
+                if (!fun(row, i)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        CacheArrayModel.prototype.join = function (split) {
+            return this.map(function (v) { return v; }).join(split);
+        };
         return CacheArrayModel;
     }());
     mve.CacheArrayModel = CacheArrayModel;

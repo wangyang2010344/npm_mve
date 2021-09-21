@@ -210,6 +210,40 @@ export namespace mve{
     indexOf(row:T){
       return this.findIndex(theRow=>theRow==row);
     }
+    count(fun:(row:T,i:number)=>boolean){
+      const size=this.size()
+      let count=0
+			for(let i=0;i<size;i++){
+				const row=this.get(i)
+				if(fun(row,i)){
+					count++
+				}
+			}
+      return count
+    }
+    exist(fun:(row:T,i:number)=>boolean){
+      const size=this.size()
+			for(let i=0;i<size;i++){
+				const row=this.get(i)
+				if(fun(row,i)){
+					return true
+				}
+			}
+      return false
+    }
+    all(fun:(row:T,i:number)=>boolean){
+      const size=this.size()
+			for(let i=0;i<size;i++){
+				const row=this.get(i)
+				if(!fun(row,i)){
+					return false
+				}
+			}
+      return true
+    }
+    join(split?:string){
+      return this.map(v=>v).join(split)
+    }
 	}
   export class ArrayModel<T> extends CacheArrayModel<T>{
     private readonly views_value:SimpleArray<ArrayModelView<T>>;

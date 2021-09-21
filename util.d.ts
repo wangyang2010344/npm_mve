@@ -81,6 +81,10 @@ export declare namespace mve {
         filter(fun: (row: T, i: number) => boolean): T[];
         findRow(fun: (row: T, i: number) => boolean): T;
         indexOf(row: T): number;
+        count(fun: (row: T, i: number) => boolean): number;
+        exist(fun: (row: T, i: number) => boolean): boolean;
+        all(fun: (row: T, i: number) => boolean): boolean;
+        join(split?: string): string;
     }
     class ArrayModel<T> extends CacheArrayModel<T> {
         private readonly views_value;
