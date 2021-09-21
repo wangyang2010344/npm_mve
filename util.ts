@@ -31,7 +31,10 @@ export interface BaseArray<T> extends BaseReadArray<T>{
 	clear():void
 }
 export class SimpleArray<T> implements BaseArray<T>{
-	private array:T[]=[]
+	constructor(...ts:T[]){
+		this.array=ts
+	}
+	private readonly array:T[]
 	get(i: number): T {
 		return this.array[i]
 	}
@@ -146,7 +149,7 @@ export namespace mve{
       this.views.push(view);
 			//自动初始化
       for(var i=0;i<this.array.size();i++){
-        view.insert(i,this.array[i])
+        view.insert(i,this.array.get(i))
       }
     }
     removeView(view:ArrayModelView<T>){
@@ -157,11 +160,11 @@ export namespace mve{
     }
 		get(i: number): T {
 			//不支持响应式
-			return this.array[i]
+			return this.array.get(i)
 		}
 		getLast(): T {
 			const size=this.size()
-			return this.array[size-1]
+			return this.array.get(size-1)
 		}
 		findIndex(fun: (v: T, i: number) => boolean): number {
 			const size=this.size()
